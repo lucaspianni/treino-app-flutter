@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "851797641213",
+    "project_id": "treino-app-1e925",
+    "storage_bucket": "treino-app-1e925.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:851797641213:android:649e2689059f4d13dbbb94",
+        "android_client_info": {
+          "package_name": "com.example.treino_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBa41v7YQCAktOl2mEsNRNzdOFJZtyg-W0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
