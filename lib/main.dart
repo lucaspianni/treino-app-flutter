@@ -107,7 +107,7 @@ Widget build(BuildContext context) {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const TreinoPage(),
+                builder: (context) => const TelaTreinos(),
               ),
             );
           },
@@ -284,15 +284,23 @@ Future<void> salvarTreinoOnline() async {
       'ultimaAtualizacao': DateTime.now(),
     });
   }
-
-  final List<String> exercicios = [
+Map<String, List<String>> treinos = {
+  'Peito': [
     'Supino reto',
+  ],
+  'Perna': [
     'Agachamento',
+  ],
+  'Costas': [
     'Remada baixa',
+  ],
+  'Braço': [
     'Rosca direta',
+  ],
+  'Abdômen': [
     'Abdominal',
-  ];
-
+  ],
+};
   List<bool> concluidos = [false, false, false, false, false];
 
   int segundos = 60;
@@ -360,69 +368,213 @@ Future<void> salvarTreinoOnline() async {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    int totalConcluidos = concluidos.where((item) => item).length;
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Treinos'),
+      centerTitle: true,
+    ),
+    body: Column(
+      children: [
+    
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text(
+            '${treinos.length} treinos disponíveis',
+            style: const TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Treinos'), centerTitle: true),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              '$totalConcluidos/${exercicios.length} concluídos',
-              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-            ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: treinos.keys.length,
+            itemBuilder: (context, index) {
+              final nomeTreino = treinos.keys.elementAt(index);
+
+            return Card(
+  margin: const EdgeInsets.all(10),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(20),
+  ),
+  child: ListTile(
+    leading: const Icon(Icons.fitness_center),
+    title: Text(nomeTreino),
+    subtitle: const Text('Toque para abrir treino'),
+    trailing: const Icon(Icons.arrow_forward_ios),
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TelaExercicios(
+            nomeTreino: nomeTreino,
+            exercicios: treinos[nomeTreino]!,
           ),
-          Card(
-            margin: const EdgeInsets.all(15),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  const Text('Descanso entre séries',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  Text('$segundos segundos',
-                      style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: rodando ? pararDescanso : iniciarDescanso,
-                    child: Text(rodando ? 'Parar' : 'Iniciar descanso'),
-                  ),
-                ],
-              ),
-            ),
+        ),
+      );
+    },
+  ),
+); 
+            },
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: exercicios.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  child: CheckboxListTile(
-                    value: concluidos[index],
-                    title: Text(exercicios[index]),
-                    subtitle: const Text('3 séries de 12 repetições'),
-                    secondary: const Icon(Icons.fitness_center),
-                    onChanged: (value) {
-                      setState(() {
-                        concluidos[index] = value!;
-                      });
-                      salvarDados();
-                      salvarTreinoOnline();
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
+    ),
+  );
+}
+}
+class TelaExercicios extends StatefulWidget {
+  final String nomeTreino;
+  final List<String> exercicios;
+
+  const TelaExercicios({
+    super.key,
+    required this.nomeTreino,
+    required this.exercicios,
+  });
+
+  @override
+  State<TelaExercicios> createState() => _TelaExerciciosState();
+}
+
+class _TelaExerciciosState extends State<TelaExercicios> {
+  List<bool> concluidos = [];
+
+  @override
+  void initState() {
+  super.initState();
+
+    concluidos = List.generate(
+      widget.exercicios.length,
+      (index) => false,
     );
   }
+
+  Future<void> salvarTreinoOnline() async {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) return;
+
+  await FirebaseFirestore.instance
+      .collection('treinos')
+      .doc(user.uid)
+      .set({
+  'treino': widget.nomeTreino,
+  'exercicios': widget.exercicios,
+  'concluidos': concluidos,
+  'ultimaAtualizacao': DateTime.now(),
+});
+}
+
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(widget.nomeTreino),
+      centerTitle: true,
+    ),
+
+    floatingActionButton: FloatingActionButton.extended(
+      backgroundColor: Colors.red,
+      foregroundColor: Colors.white,
+      onPressed: () {
+  final controller = TextEditingController();
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Novo exercício'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Digite o exercício',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancelar'),
+          ),
+         ElevatedButton(
+  onPressed: () {
+    if (controller.text.isNotEmpty) {
+      setState(() {
+        widget.exercicios.add(controller.text);
+        concluidos.add(false);
+      });
+
+      salvarTreinoOnline();
+
+      Navigator.pop(context);
+    }
+  },
+  child: const Text('Adicionar'),
+), 
+        ],
+      );
+    },
+  );
+},
+      icon: const Icon(Icons.add),
+      label: const Text('Adicionar'),
+    ),
+
+    body: ListView.builder(
+      itemCount: widget.exercicios.length,
+      itemBuilder: (context, index) {
+       return Dismissible(
+  key: Key(widget.exercicios[index]),
+  background: Container(
+    color: Colors.red,
+    alignment: Alignment.centerRight,
+    padding: const EdgeInsets.only(right: 20),
+    child: const Icon(
+      Icons.delete,
+      color: Colors.white,
+    ),
+  ),
+  onDismissed: (direction) {
+    setState(() {
+      widget.exercicios.removeAt(index);
+      concluidos.removeAt(index);
+    });
+
+    salvarTreinoOnline();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Exercício removido'),
+      ),
+    );
+  },
+  child: Card(
+    margin: const EdgeInsets.all(10),
+    child: ListTile(
+      leading: Checkbox(
+        value: concluidos[index],
+        onChanged: (value) {
+          setState(() {
+            concluidos[index] = value!;
+          });
+
+          salvarTreinoOnline();
+        },
+      ),
+      title: Text(widget.exercicios[index]),
+      subtitle: const Text('3 séries de 12 repetições'),
+    ),
+  ),
+);
+      },
+    ),
+  );
+} 
 }
 
 class TelaProgresso extends StatelessWidget {
