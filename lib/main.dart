@@ -1,3 +1,6 @@
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'firebase_options.dart';
 import 'pages/treino_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,7 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
 
   runApp(const MeuTreinoApp());
 }
@@ -46,87 +51,15 @@ Widget build(BuildContext context) {
       primarySwatch: Colors.deepPurple,
     ),
 
- home: Builder(
-  builder: (context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Meu Treino'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-      ),
-
-     body: Padding(
-  padding: const EdgeInsets.all(20),
-
-  child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-
-      const Icon(
-        Icons.fitness_center,
-        size: 100,
-        color: Colors.black,
-      ),
-
-      const SizedBox(height: 20),
-
-      const Text(
-        'Meu Treino',
-        style: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-
-      const SizedBox(height: 10),
-
-      const Text(
-        'Seu foco cria resultados.',
-        style: TextStyle(
-          fontSize: 18,
-          color: Colors.grey,
-        ),
-      ),
-
-      const SizedBox(height: 50),
-
-      SizedBox(
-        width: double.infinity,
-        height: 60,
-
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const TelaTreinos(),
-              ),
-            );
-          },
-
-          child: const Text(
-            'Iniciar treino',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ),
-    ],
-  ),
-),
-    );
-  },
-),
+  home: FirebaseAuth.instance.currentUser == null
+    ? LoginPage(
+        modoEscuro: modoEscuro,
+        trocarTema: trocarTema,
+      )
+    : HomePage(
+        modoEscuro: modoEscuro,
+        trocarTema: trocarTema,
+      ), 
   );
 }
 }
@@ -191,68 +124,156 @@ class TelaInicio extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: modoEscuro ? const Color(0xFF121212) : const Color(0xFFF5F3FF),
       appBar: AppBar(
-  title: const Text('Meu Treino'),
-  centerTitle: true,
-  actions: [
-    IconButton(
-      onPressed: trocarTema,
-      icon: Icon(
-        modoEscuro ? Icons.light_mode : Icons.dark_mode,
-      ),
-    ),
-
-    IconButton(
-      onPressed: () async {
-        await FirebaseAuth.instance.signOut();
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LoginPage(
-              modoEscuro: modoEscuro,
-              trocarTema: trocarTema,
-            ),
+        title: const Text('Meu Treino'),
+        centerTitle: true,
+        elevation: 0,
+        actions: [
+          IconButton(
+            onPressed: trocarTema,
+            icon: Icon(modoEscuro ? Icons.light_mode : Icons.dark_mode),
           ),
-        );
-      },
-      icon: const Icon(Icons.logout),
-    ),
-  ],
-),
-  
-    body: Padding(
-        padding: const EdgeInsets.all(20),
+          IconButton(
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LoginPage(
+                    modoEscuro: modoEscuro,
+                    trocarTema: trocarTema,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Olá, Lucas 💪',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            const Text('Seu foco cria resultados.',
-                style: TextStyle(fontSize: 18, color: Colors.grey)),
-            const SizedBox(height: 30),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple,
-                borderRadius: BorderRadius.circular(25),
+            const Text(
+              'Olá, Lucas 💪',
+              style: TextStyle(
+                fontSize: 34,
+                fontWeight: FontWeight.w900,
               ),
-              child: const Row(
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Pronto para evoluir hoje?',
+              style: TextStyle(
+                fontSize: 17,
+                color: modoEscuro ? Colors.grey[400] : Colors.grey[700],
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF7C3AED),
+                    Color(0xFF4F46E5),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.deepPurple.withOpacity(0.35),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.local_fire_department, color: Colors.white, size: 50),
-                  SizedBox(width: 20),
-                  Expanded(
-                    child: Text(
-                      'Continue firme no treino de hoje!',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Icon(
+                    Icons.local_fire_department,
+                    color: Colors.white,
+                    size: 52,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Treino de hoje',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 16,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Mantenha o foco e conclua seus exercícios!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            Row(
+              children: [
+                _cardResumo(
+                  icone: Icons.fitness_center,
+                  numero: '5',
+                  texto: 'Treinos',
+                  cor: Colors.orange,
+                ),
+                const SizedBox(width: 14),
+                _cardResumo(
+                  icone: Icons.check_circle,
+                  numero: '0',
+                  texto: 'Concluídos',
+                  cor: Colors.green,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 28),
+
+            SizedBox(
+              width: double.infinity,
+              height: 62,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
+                  elevation: 8,
+                  shadowColor: Colors.deepPurple.withOpacity(0.4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TelaTreinos(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.play_arrow_rounded, size: 30),
+                label: const Text(
+                  'Começar treino',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
@@ -260,8 +281,49 @@ class TelaInicio extends StatelessWidget {
       ),
     );
   }
-}
 
+  Widget _cardResumo({
+    required IconData icone,
+    required String numero,
+    required String texto,
+    required Color cor,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: cor,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: cor.withOpacity(0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Icon(icone, color: Colors.white, size: 38),
+            const SizedBox(height: 12),
+            Text(
+              numero,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              texto,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 class TelaTreinos extends StatefulWidget {
   const TelaTreinos({super.key});
 
@@ -284,21 +346,65 @@ Future<void> salvarTreinoOnline() async {
       'ultimaAtualizacao': DateTime.now(),
     });
   }
-Map<String, List<String>> treinos = {
+Map<String, List<Map<String, dynamic>>> treinos = {
   'Peito': [
-    'Supino reto',
+    {
+      'nome': 'Supino reto',
+      'series': '4',
+      'repeticoes': '12',
+      'descricao':
+          'Exercício focado no peitoral, ombros e tríceps.',
+      'video':
+          'https://www.youtube.com/watch?v=VmB1G1K7v94',
+    },
   ],
+
   'Perna': [
-    'Agachamento',
+    {
+      'nome': 'Agachamento',
+      'series': '4',
+      'repeticoes': '10',
+      'descricao':
+          'Fortalece pernas e glúteos.',
+      'video':
+          'https://www.youtube.com/watch?v=aclHkVaku9U',
+    },
   ],
+
   'Costas': [
-    'Remada baixa',
+    {
+      'nome': 'Remada baixa',
+      'series': '3',
+      'repeticoes': '12',
+      'descricao':
+          'Exercício para desenvolvimento das costas.',
+      'video':
+          'https://www.youtube.com/watch?v=roCP6wCXPqo',
+    },
   ],
+
   'Braço': [
-    'Rosca direta',
+    {
+      'nome': 'Rosca direta',
+      'series': '3',
+      'repeticoes': '12',
+      'descricao':
+          'Foco no bíceps.',
+      'video':
+          'https://www.youtube.com/watch?v=kwG2ipFRgfo',
+    },
   ],
+
   'Abdômen': [
-    'Abdominal',
+    {
+      'nome': 'Abdominal',
+      'series': '4',
+      'repeticoes': '20',
+      'descricao':
+          'Fortalecimento do abdômen.',
+      'video':
+          'https://www.youtube.com/watch?v=1fbU_MkV7NE',
+    },
   ],
 };
   List<bool> concluidos = [false, false, false, false, false];
@@ -368,16 +474,17 @@ Map<String, List<String>> treinos = {
     super.dispose();
   }
 
- @override
+@override
 Widget build(BuildContext context) {
   return Scaffold(
     appBar: AppBar(
       title: const Text('Treinos'),
       centerTitle: true,
     ),
+
     body: Column(
       children: [
-    
+
         Padding(
           padding: const EdgeInsets.all(20),
           child: Text(
@@ -392,19 +499,37 @@ Widget build(BuildContext context) {
         Expanded(
           child: ListView.builder(
             itemCount: treinos.keys.length,
+
             itemBuilder: (context, index) {
               final nomeTreino = treinos.keys.elementAt(index);
 
-            return Card(
-  margin: const EdgeInsets.all(10),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(20),
+              return Container(
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 15,
+                  vertical: 8,
+                ),
+
+              child: Container(
+  decoration: BoxDecoration(
+    gradient: LinearGradient(
+      colors: [
+        Colors.deepPurple.shade500,
+        Colors.deepPurple.shade800,
+      ],
+    ),
+    borderRadius: BorderRadius.circular(25),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.deepPurple.withOpacity(0.35),
+        blurRadius: 12,
+        offset: const Offset(0, 8),
+      ),
+    ],
   ),
-  child: ListTile(
-    leading: const Icon(Icons.fitness_center),
-    title: Text(nomeTreino),
-    subtitle: const Text('Toque para abrir treino'),
-    trailing: const Icon(Icons.arrow_forward_ios),
+
+  child: InkWell(
+    borderRadius: BorderRadius.circular(25),
+
     onTap: () {
       Navigator.push(
         context,
@@ -416,8 +541,79 @@ Widget build(BuildContext context) {
         ),
       );
     },
+
+    child: Padding(
+      padding: const EdgeInsets.all(18),
+
+      child: Row(
+        children: [
+
+          Container(
+            padding: const EdgeInsets.all(15),
+
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(18),
+            ),
+
+            child: const Icon(
+              Icons.fitness_center,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+
+          const SizedBox(width: 18),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+
+                Text(
+                  nomeTreino,
+
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  '${treinos[nomeTreino]!.length} exercícios',
+
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Container(
+            padding: const EdgeInsets.all(10),
+
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+            ),
+
+            child: const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white,
+              size: 18,
+            ),
+          ),
+        ],
+      ),
+    ),
   ),
-); 
+), 
+              );
             },
           ),
         ),
@@ -426,9 +622,10 @@ Widget build(BuildContext context) {
   );
 }
 }
+ 
 class TelaExercicios extends StatefulWidget {
   final String nomeTreino;
-  final List<String> exercicios;
+  final List<Map<String, dynamic>> exercicios;
 
   const TelaExercicios({
     super.key,
@@ -442,31 +639,102 @@ class TelaExercicios extends StatefulWidget {
 
 class _TelaExerciciosState extends State<TelaExercicios> {
   List<bool> concluidos = [];
+  int segundos = 60;
+Timer? timer;
+bool rodando = false;
+ double get progresso {
+  if (concluidos.isEmpty) return 0;
+  final feitos = concluidos.where((item) => item).length;
+  return feitos / concluidos.length;
+}
 
-  @override
-  void initState() {
+@override
+void initState() {
   super.initState();
 
-    concluidos = List.generate(
-      widget.exercicios.length,
-      (index) => false,
-    );
-  }
+  concluidos = List.generate(
+    widget.exercicios.length,
+    (index) => false,
+  );
 
-  Future<void> salvarTreinoOnline() async {
+  carregarTreinoOnline();
+}
+
+Future<void> salvarTreinoOnline() async {
   final user = FirebaseAuth.instance.currentUser;
 
   if (user == null) return;
 
   await FirebaseFirestore.instance
       .collection('treinos')
-      .doc(user.uid)
+      .doc('${user.uid}_${widget.nomeTreino}')
       .set({
-  'treino': widget.nomeTreino,
-  'exercicios': widget.exercicios,
-  'concluidos': concluidos,
-  'ultimaAtualizacao': DateTime.now(),
-});
+    'treino': widget.nomeTreino,
+    'exercicios': widget.exercicios,
+    'concluidos': concluidos,
+    'ultimaAtualizacao': DateTime.now(),
+  });
+}
+
+void iniciarDescanso() {
+  if (rodando) return;
+
+  setState(() {
+    segundos = 60;
+    rodando = true;
+  });
+
+  timer = Timer.periodic(
+    const Duration(seconds: 1),
+    (timer) {
+      if (segundos > 0) {
+        setState(() {
+          segundos--;
+        });
+      } else {
+        timer.cancel();
+
+        setState(() {
+          rodando = false;
+        });
+      }
+    },
+  );
+}
+
+void pararDescanso() {
+  timer?.cancel();
+
+  setState(() {
+    segundos = 60;
+    rodando = false;
+  });
+}
+
+Future<void> carregarTreinoOnline() async {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) return;
+
+  final doc = await FirebaseFirestore.instance
+      .collection('treinos')
+      .doc('${user.uid}_${widget.nomeTreino}')
+      .get();
+
+  if (!doc.exists) return;
+
+  final dados = doc.data();
+
+  if (dados == null) return;
+
+  final listaSalva = List<bool>.from(dados['concluidos'] ?? []);
+
+  setState(() {
+    concluidos = List.generate(
+      widget.exercicios.length,
+      (index) => index < listaSalva.length ? listaSalva[index] : false,
+    );
+  });
 }
 
  @override
@@ -505,7 +773,13 @@ Widget build(BuildContext context) {
   onPressed: () {
     if (controller.text.isNotEmpty) {
       setState(() {
-        widget.exercicios.add(controller.text);
+      widget.exercicios.add({
+  'nome': controller.text,
+  'series': '3',
+  'repeticoes': '12',
+  'descricao': 'Novo exercício adicionado pelo usuário.',
+  'video': '',
+});  
         concluidos.add(false);
       });
 
@@ -525,57 +799,187 @@ Widget build(BuildContext context) {
       label: const Text('Adicionar'),
     ),
 
-    body: ListView.builder(
-      itemCount: widget.exercicios.length,
-      itemBuilder: (context, index) {
-       return Dismissible(
-  key: Key(widget.exercicios[index]),
-  background: Container(
-    color: Colors.red,
-    alignment: Alignment.centerRight,
-    padding: const EdgeInsets.only(right: 20),
-    child: const Icon(
-      Icons.delete,
-      color: Colors.white,
-    ),
-  ),
-  onDismissed: (direction) {
-    setState(() {
-      widget.exercicios.removeAt(index);
-      concluidos.removeAt(index);
-    });
-
-    salvarTreinoOnline();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Exercício removido'),
+  body: Column(
+  children: [
+    Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${(progresso * 100).toInt()}% concluído',
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: LinearProgressIndicator(
+              value: progresso,
+              minHeight: 14,
+              backgroundColor: Colors.grey.withOpacity(0.25),
+              color: Colors.deepPurple,
+            ),
+          ),
+        ],
       ),
-    );
-  },
-  child: Card(
-    margin: const EdgeInsets.all(10),
-    child: ListTile(
-      leading: Checkbox(
-        value: concluidos[index],
-        onChanged: (value) {
+    ),
+
+    Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.deepPurple,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        children: [
+          const Icon (Icons.timer, color: Colors.white, size: 36),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Text(
+              'Descanso: $segundos s',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+               ),
+            ),
+          ),
+          IconButton(
+            onPressed: iniciarDescanso,
+            icon: const Icon(Icons.play_arrow, color: Colors.white),
+          ),
+          IconButton(
+            onPressed: pararDescanso,
+            icon: const Icon(Icons.stop, color: Colors.white),
+          ),
+        ],
+      ),
+    ),
+
+
+   Expanded(
+  child: ListView.builder(
+    itemCount: widget.exercicios.length,
+    itemBuilder: (context, index) {
+      return Dismissible(
+        key: Key(widget.exercicios[index]['nome']),
+        background: Container(
+          color: Colors.red,
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          child: const Icon(Icons.delete, color: Colors.white),
+        ),
+        onDismissed: (direction) {
           setState(() {
-            concluidos[index] = value!;
+            widget.exercicios.removeAt(index);
+            concluidos.removeAt(index);
           });
 
           salvarTreinoOnline();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Exercício removido')),
+          );
         },
+       child: AnimatedContainer(
+  duration: const Duration(milliseconds: 300),
+
+  child: Card(
+    elevation: 6,
+    color: concluidos[index]
+        ? Colors.green.withOpacity(0.08)
+        : Colors.white,
+
+    child: ListTile(
+            leading: Transform.scale(
+              scale: 1.2,
+              child: Checkbox(
+                value: concluidos[index],
+                onChanged: (value) {
+                  setState(() {
+                    concluidos[index] = value!;
+                  });
+
+                  salvarTreinoOnline();
+                },
+              ),
+            ),
+            title: Text(
+              widget.exercicios[index]['nome'],
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                decoration: concluidos[index]
+                    ? TextDecoration.lineThrough
+                    : TextDecoration.none,
+              ),
+            ),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${widget.exercicios[index]['series']}x${widget.exercicios[index]['repeticoes']}',
+                      style: const TextStyle(
+                        color: Colors.deepPurple,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    concluidos[index] ? 'Concluído' : 'Pendente',
+                    style: TextStyle(
+                      color: concluidos[index] ? Colors.green : Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            trailing: IconButton(
+              icon: const Icon(
+                Icons.play_circle_fill,
+                color: Colors.red,
+                size: 34,
+              ),
+            onPressed: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => TelaDetalheExercicio(
+        exercicio: widget.exercicios[index],
       ),
-      title: Text(widget.exercicios[index]),
-      subtitle: const Text('3 séries de 12 repetições'),
     ),
+   );
+},  
+             ),
+            ),
+          ),
+        ),
+      );
+    },
   ),
+
+     ),
+  ],
+),
 );
-      },
-    ),
-  );
-} 
 }
+}
+         
 
 class TelaProgresso extends StatelessWidget {
   const TelaProgresso({super.key});
@@ -727,6 +1131,277 @@ class LoginPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class TelaDetalheExercicio extends StatelessWidget {
+  final Map<String, dynamic> exercicio;
+
+  const TelaDetalheExercicio({
+    super.key,
+    required this.exercicio,
+  });
+
+ @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(exercicio['nome']),
+      centerTitle: true,
+    ),
+
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+        GestureDetector(
+  onTap: () async {
+   Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => TelaPlayerVideo(
+      videoUrl: exercicio['video'],
+      nomeExercicio: exercicio['nome'],
+    ),
+  ),
+);
+  },
+
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(25),
+
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+
+        Image.network(
+          'https://img.youtube.com/vi/${YoutubePlayer.convertUrlToId(exercicio['video'])}/0.jpg',
+          height: 220,
+          width: double.infinity,
+          fit: BoxFit.cover,
+
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+
+            return Container(
+              height: 220,
+              color: Colors.black12,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          },
+
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              height: 220,
+              color: Colors.black87,
+              child: const Center(
+                child: Icon(
+                  Icons.fitness_center,
+                  color: Colors.white,
+                  size: 70,
+                ),
+              ),
+            );
+          },
+        ),
+
+        Container(
+          height: 220,
+          color: Colors.black.withOpacity(0.35),
+        ),
+
+        const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+
+            Icon(
+              Icons.play_circle_fill,
+              size: 90,
+              color: Colors.red,
+            ),
+
+            SizedBox(height: 10),
+
+            Text(
+              'Assistir exercício',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ),
+), 
+
+             
+
+          const SizedBox(height: 25),
+
+          Text(
+            exercicio['nome'],
+            style: const TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 15),
+
+          Row(
+            children: [
+
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
+
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+
+                child: Text(
+                  '${exercicio['series']} séries',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
+
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+
+                child: Text(
+                  '${exercicio['repeticoes']} reps',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 25),
+
+          const Text(
+            'Descrição',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            exercicio['descricao'],
+            style: const TextStyle(
+              fontSize: 17,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+}
+
+class TelaPlayerVideo extends StatefulWidget {
+  final String videoUrl;
+  final String nomeExercicio;
+
+  const TelaPlayerVideo({
+    super.key,
+    required this.videoUrl,
+    required this.nomeExercicio,
+  });
+
+  @override
+  State<TelaPlayerVideo> createState() => _TelaPlayerVideoState();
+}
+
+class _TelaPlayerVideoState extends State<TelaPlayerVideo> {
+  late YoutubePlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
+
+    _controller = YoutubePlayerController(
+      initialVideoId: videoId ?? '',
+      flags: const YoutubePlayerFlags(
+        autoPlay: true,
+        mute: false,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return YoutubePlayerBuilder(
+      player: YoutubePlayer(
+        controller: _controller,
+        showVideoProgressIndicator: true,
+      ),
+      builder: (context, player) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(widget.nomeExercicio),
+            centerTitle: true,
+          ),
+          body: Column(
+            children: [
+              player,
+
+              const SizedBox(height: 20),
+
+              const Padding(
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  'Assista com atenção à execução correta do movimento.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
