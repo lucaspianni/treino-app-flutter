@@ -1,17 +1,80 @@
-# treino_app
+# 🚀 FitPulse
 
-A new Flutter project.
+Aplicativo de treino desenvolvido com Flutter e Firebase, focado em organização de exercícios, acompanhamento de desempenho e evolução física.
 
-## Getting Started
+## 🌐 Testar o Projeto
 
-This project is a starting point for a Flutter application.
+Em breve disponível online via Firebase Hosting.
 
-A few resources to get you started if this is your first Flutter project:
+Modo visitante disponível para testes sem necessidade de cadastro.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## ✨ Funcionalidades
+
+- 🔐 Login e cadastro com Firebase Authentication
+- 👤 Modo visitante para demonstração
+- 💪 Treinos por grupo muscular
+- 📈 Barra de progresso do treino
+- ⏱️ Timer de descanso
+- 🎥 Vídeos demonstrativos dos exercícios
+- ☁️ Salvamento online com Cloud Firestore
+- 🎨 Interface futurista neon inspirada em aplicativos fitness premium
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- Flutter
+- Dart
+- Firebase Authentication
+- Cloud Firestore
+- SharedPreferences
+- Git
+- GitHub
+
+---
+
+## 📱 Telas do Aplicativo
+
+- Login futurista
+- Home premium
+- Lista de treinos
+- Exercícios com acompanhamento
+- Visualização de vídeos
+
+---
+
+## 🎯 Objetivo
+
+Este projeto foi desenvolvido para compor meu portfólio como desenvolvedor, demonstrando conhecimentos em:
+
+- Desenvolvimento Mobile com Flutter
+- Integração com Firebase
+- Gerenciamento de estado
+- Persistência de dados
+- UI/UX moderna
+- Arquitetura de aplicações
+
+---
+
+## 👨‍💻 Autor
+
+Lucas da Silva Santos
+
+GitHub:
+https://github.com/lucaspianni
+
+---
+
+## 📌 Status
+
+🚧 Em desenvolvimento
+
+Novas funcionalidades planejadas:
+
+- Inteligência Artificial para sugestão de treinos
+- Histórico de evolução
+- Dashboard de desempenho
+- Estatísticas avançadas
+- Versão Web pública
