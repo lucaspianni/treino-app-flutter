@@ -1,2 +1,40 @@
-# treino-app-flutter
-Aplicativo mobile de treino desenvolvido com Flutter.
+# FitPulse
+
+Aplicativo de treino desenvolvido em Flutter com Firebase, criado para organizar exercícios, acompanhar progresso e permitir que usuários testem o app diretamente pelo navegador.
+
+## Testar o projeto
+
+Acesse a versão Web:
+
+🔗 EM BREVE: coloque aqui o link do Firebase Hosting
+
+Também é possível testar pelo modo visitante, sem criar conta.
+
+## Funcionalidades
+
+- Login e cadastro com Firebase
+- Modo visitante para recrutadores testarem
+- Treinos por grupo muscular
+- Progresso de exercícios
+- Timer de descanso
+- Vídeos demonstrativos
+- Interface futurista neon
+- Salvamento online com Firestore
+
+## Tecnologias utilizadas
+
+- Flutter
+- Dart
+- Firebase Authentication
+- Cloud Firestore
+- SharedPreferences
+- YouTube Player
+- Git e GitHub
+
+## Objetivo
+
+Este projeto foi desenvolvido como parte do meu portfólio na área de desenvolvimento mobile/web, demonstrando conhecimentos em Flutter, autenticação, banco de dados em nuvem, navegação entre telas e construção de interfaces modernas.
+
+## Autor
+
+Lucas da Silva Santos
