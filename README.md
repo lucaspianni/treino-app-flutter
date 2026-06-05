@@ -35,7 +35,3 @@ Aplicativo de treino desenvolvido em Flutter com Firebase, criado para organizar
 ## Objetivo
 
 Este projeto foi desenvolvido como parte do meu portfólio na área de desenvolvimento mobile/web, demonstrando conhecimentos em Flutter, autenticação, banco de dados em nuvem, navegação entre telas e construção de interfaces modernas.
-
-## Autor
-
-Lucas da Silva Santos
