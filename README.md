@@ -60,7 +60,7 @@ Este projeto foi desenvolvido para compor meu portfólio como desenvolvedor, dem
 
 ## 👨‍💻 Autor
 
-Lucas da Silva Santos
+Lucas Pianni
 
 GitHub:
 https://github.com/lucaspianni
